@@ -64,7 +64,7 @@ public class LockHandler extends ObjectEventHandler {
 	
 	private void handleLockEvent(IObjectEvent event) {
 		String modifier = Integer.toString(event.getModifingId());
-		if (! m_init.getIgnoreUserId(event.getJEvent().EventId).equals(modifier)) {
+		if (m_init.getIgnoreUserId(event.getJEvent().EventId).equals(modifier)) {
 			return;		// ignore event initiated by a particular user
 		}
 		
