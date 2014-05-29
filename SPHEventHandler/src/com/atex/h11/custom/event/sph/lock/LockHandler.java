@@ -1,7 +1,9 @@
 package com.atex.h11.custom.event.sph.lock;
 
 import java.util.Vector;
+
 import org.apache.log4j.Logger;
+
 import com.atex.h11.custom.event.sph.lock.Constants;
 import com.atex.h11.custom.event.sph.lock.Initializer;
 import com.unisys.media.cr.adapter.ncm.common.business.interfaces.INCMMetadataNodeManager;
@@ -61,6 +63,11 @@ public class LockHandler extends ObjectEventHandler {
 	}
 	
 	private void handleLockEvent(IObjectEvent event) {
+		String modifier = Integer.toString(event.getModifingId());
+		if (! m_init.getIgnoreUserId(event.getJEvent().EventId).equals(modifier)) {
+			return;		// ignore event initiated by a particular user
+		}
+		
 		if (event.getJEvent().EventId == Constants.LOCK_OBJ) {
 			logger.debug("Lock event received: " + event.toString()); 			
 		}

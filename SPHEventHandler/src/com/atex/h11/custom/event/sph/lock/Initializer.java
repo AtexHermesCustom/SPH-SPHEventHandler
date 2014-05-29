@@ -1,6 +1,7 @@
 package com.atex.h11.custom.event.sph.lock;
 
 import java.io.File;
+
 import com.unisys.media.cr.adapter.ncm.common.business.interfaces.INCMMetadataNodeManager;
 import com.unisys.media.cr.adapter.ncm.common.data.datasource.NCMDataSourceDescriptor;
 import com.unisys.media.cr.adapter.ncm.model.data.datasource.NCMDataSource;
@@ -43,5 +44,13 @@ public class Initializer extends InitializerAbstract {
 	public String getLockMetadataField() {
 		return getProperty("LockMetadataField");
 	}
+	
+	/**
+	 * get Hermes user id to be ignored from properties file
+	 * @return
+	 */	
+	public String getIgnoreUserId(int eventId) {
+		return getProperty("Event" + eventId + ".IgnoreUserId");
+	}	
 	
 }
