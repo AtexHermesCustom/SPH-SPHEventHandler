@@ -82,19 +82,19 @@ public class LockHandler extends ObjectEventHandler {
 		NCMObjectValueClient sp = (NCMObjectValueClient) m_init.getHermesDataSource().getNode(spPK, objProps);
 		
 		try {
-			int metaValue = 0;
+			boolean metaValue = false;
 			if (event.getJEvent().EventId == Constants.LOCK_OBJ) {
-				metaValue = m_init.getLockedMetadataValue();
+				metaValue = true;
 			}
 			else if (event.getJEvent().EventId == Constants.UNLOCK_OBJ) {
-				metaValue = m_init.getUnlockedMetadataValue();
+				metaValue = false;
 			}
 			else {
 				throw new Exception("Invalid event id: " + event.getJEvent().EventId);
 			}
 			
 			// update Lock indicator metadata 
-			setMetadata(sp, m_init.getLockMetadataGroup(), m_init.getLockMetadataField(), metaValue);
+			setMetadata(sp, m_init.getLockMetadataGroup(), m_init.getLockMetadataField(), Boolean.toString(metaValue));
 			
 		} catch (Exception e) {
 			logger.error("handleLockEvent: Error encountered for Object [" + 
@@ -102,7 +102,7 @@ public class LockHandler extends ObjectEventHandler {
 		}			
 	}
 	
-	private void setMetadata(NCMObjectValueClient objVC, String metaGroup, String metaField, int metaValue) {
+	private void setMetadata(NCMObjectValueClient objVC, String metaGroup, String metaField, String metaValue) {
 		String objName = objVC.getNCMName();
 		Integer objId = getObjIdFromPK(objVC.getPK());
 		logger.debug("setMetadata: Object [" + objId.toString() + "," + objName + "," + Integer.toString(objVC.getType()) + "]" +

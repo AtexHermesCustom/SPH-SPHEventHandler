@@ -42,13 +42,6 @@ public class Initializer extends InitializerAbstract {
 	
 	public String getLockMetadataField() {
 		return getProperty("LockMetadataField");
-	}	
-	
-	public int getLockedMetadataValue() {
-		return Integer.parseInt(getProperty("LockedValue"));
 	}
 	
-	public int getUnlockedMetadataValue() {
-		return Integer.parseInt(getProperty("UnlockedValue"));
-	}
 }
