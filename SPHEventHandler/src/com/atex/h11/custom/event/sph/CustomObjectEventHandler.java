@@ -57,6 +57,17 @@ public class CustomObjectEventHandler extends ObjectEventHandler {
 				new SPEventHandler(m_init, ds).handleSPEvent(event);
 			}
 		}
+		// events for text objects
+		if (event.getObjectType() == NCMObjectNodeType.OBJ_TEXT) {
+			// trigger the handler only for:
+			// 1. object save (in any application)
+			// 2. object move/transfer (only if done in Media Desktop).  move/transfer in Newsroom triggers a Save event
+			if (event.getJEvent().EventId == Constants.SAVE_OBJ ||
+				(event.getJEvent().EventId == Constants.MOVE_OBJ && 
+				 event.getJEvent().AppId == Integer.parseInt(ApplicationConstants.APP_MD_PRODUCTION_ID))) {
+				new ChildEventHandler(m_init, ds).handleObjectEvent(event);
+			}
+		}		
 		// events for images
 		else if (event.getObjectType() == NCMObjectNodeType.OBJ_PHOTO) {
 			// trigger handler only for:
