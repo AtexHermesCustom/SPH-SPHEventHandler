@@ -109,6 +109,20 @@ public class Initializer extends InitializerAbstract {
 	}	
 	
 	/**
+	 * returns true or false - whether to lock the sp or not during processing
+	 * @return
+	 */	
+	public boolean getLockSPSetting() {
+		String s = getProperty("LockSP");
+		if (s.equalsIgnoreCase("true") || s.equalsIgnoreCase("yes")) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}		
+	
+	/**
 	 * get status to set after exporting
 	 * @return
 	 */	

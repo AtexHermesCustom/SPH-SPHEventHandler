@@ -73,22 +73,24 @@ public class SPEventHandler {
 			logger.debug("Package saved: name=" + sp.getNCMName() + ", id=" + Integer.toString(objId)
 				+ ", status=" + Short.toString(spStatus.getStatus()));
 
-			try {
-				// try to lock the package. 
-				// this is not really necessary to update the children's status.
-				// locking the package is used as an indicator that its children are being updated.
-				if (!sp.getLockInfo().isLocked()) {
-					sp.lock();
-					spLocked = true;
+			if (m_init.getLockSPSetting() == true) {	// check whether to lock package or not
+				try {
+					// try to lock the package. 
+					// this is not really necessary to update the children's status.
+					// locking the package is used as an indicator that its children are being updated.
+					if (!sp.getLockInfo().isLocked()) {
+						sp.lock();
+						spLocked = true;
+					}
+					else {
+						logger.warn("Unable to lock package: name=" + sp.getNCMName() + 
+							". Locked by user=" + sp.getLockInfo().getUserName() + " on ws=" + sp.getLockInfo().getWsName());
+					}				
 				}
-				else {
-					logger.warn("Unable to lock package: name=" + sp.getNCMName() + 
-						". Locked by user=" + sp.getLockInfo().getUserName() + " on ws=" + sp.getLockInfo().getWsName());
-				}				
+				catch (Exception e) {
+					logger.error("Unable to lock package: " + sp.getNCMName() + ".", e);
+				}
 			}
-			catch (Exception e) {
-				logger.error("Unable to lock package: " + sp.getNCMName() + ".", e);
-			}			
 			
 			NCMObjectBuildProperties objProps = new NCMObjectBuildProperties();
 			objProps.setGetByObjId(true);
