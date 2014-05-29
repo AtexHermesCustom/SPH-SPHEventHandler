@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<project name="Build jar" default="main" basedir=".">
+	<!-- Sets variables which can later be used. -->
+	<!-- The value of a property is accessed via ${} -->
+	<property name="src.dir" location="src" />
+	<property name="bin.dir" location="bin" />
+	<property name="dist.dir" location="dist" />
+
+	<!-- Deletes the existing build, docs and dist directory-->
+	<target name="clean">
+		<delete dir="${bin.dir}" />
+		<delete dir="${dist.dir}" />
+	</target>
+
+	<!-- Creates the  build, docs and dist directory-->
+	<target name="makedir">
+		<mkdir dir="${bin.dir}" />
+		<mkdir dir="${dist.dir}" />
+	</target>
+
+	<!-- Compiles the java code (including the usage of library for JUnit -->
+	<target name="compile" depends="clean, makedir">
+		<javac srcdir="${src.dir}" destdir="${bin.dir}">
+		</javac>
+	</target>
+
+	<!--Creates the deployable jar file  -->
+	<target name="jar" depends="compile">
+		<jar destfile="${dist.dir}\spheventhandler.jar" basedir="${bin.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="com.atex.custom.sph.eventhandler.CustomObjectEventHandler" />
+			</manifest>
+		</jar>
+	</target>
+
+	<!-- main -->
+	<target name="main" depends="compile, jar">
+		<description>Main target</description>
+	</target>
+</project>

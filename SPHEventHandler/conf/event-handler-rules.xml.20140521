@@ -1,0 +1,41 @@
+<InvokeRules>
+<!-- ##################### -->
+<!-- rules for page events -->
+<!-- ##################### -->
+
+<!-- none -->
+
+<!-- ####################### -->
+<!-- rules for object events -->
+<!-- ####################### -->
+<ObjectFullRule name="Object_Move">
+ <EventID value="10"/>
+ <ObjectInPage value ="ALL"/> 
+ <ObjTypeList value ="17" />
+ <StatusesList value="4,5,7,9,6,8,23" />
+ <Handlerclass value="com.atex.h11.custom.event.sph.CustomObjectEventHandler"/>
+</ObjectFullRule>
+
+<ObjectFullRule name="Object_Save">
+ <EventID value="5"/>
+ <ObjectInPage value ="ALL"/>
+ <ObjTypeList value ="6,17" />
+ <StatusesList value="12,11,13,14,4,5,7,9,6,8,23" />
+ <Handlerclass value="com.atex.h11.custom.event.sph.CustomObjectEventHandler"/>
+</ObjectFullRule>
+
+<ObjectMultilinkRule name="Object_Unlink">
+ <EventID value="9"/>
+ <ObjectInPage value ="ALL"/> 
+ <ObjTypeList value ="7" />
+ <Handlerclass value="com.atex.h11.custom.event.sph.CustomObjectEventHandler"/>
+</ObjectMultilinkRule>
+
+<ObjectRule name="Object_LayoutSave">
+ <EventID value="63"/>
+ <ObjectInPage value ="ALL"/> 
+ <ObjTypeList value ="7" />
+ <Handlerclass value="com.atex.h11.custom.event.sph.CustomObjectEventHandler"/>
+</ObjectRule>
+
+</InvokeRules>

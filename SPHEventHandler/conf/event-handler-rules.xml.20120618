@@ -1,0 +1,33 @@
+<InvokeRules>
+<!-- ##################### -->
+<!-- rules for page events -->
+<!-- ##################### -->
+
+<!-- none -->
+
+<!-- ####################### -->
+<!-- rules for object events -->
+<!-- ####################### -->
+<ObjectFullRule name="Object_Save">
+ <EventID value="5"/>
+ <ObjectInPage value ="ALL"/>
+ <ObjTypeList value ="6" />
+ <StatusesList value="6,31,32,34" />
+ <Handlerclass value="com.atex.h11.custom.event.sph.CustomObjectEventHandler"/>
+</ObjectFullRule>
+
+<ObjectMultilinkRule name="Object_Unlink">
+ <EventID value="9"/>
+ <ObjectInPage value ="ALL"/> 
+ <ObjTypeList value ="7" />
+ <Handlerclass value="com.atex.h11.custom.event.sph.CustomObjectEventHandler"/>
+</ObjectMultilinkRule>
+
+<ObjectRule name="Object_LayoutSave">
+ <EventID value="63"/>
+ <ObjectInPage value ="ALL"/> 
+ <ObjTypeList value ="7" />
+ <Handlerclass value="com.atex.h11.custom.event.sph.CustomObjectEventHandler"/>
+</ObjectRule>
+
+</InvokeRules>
