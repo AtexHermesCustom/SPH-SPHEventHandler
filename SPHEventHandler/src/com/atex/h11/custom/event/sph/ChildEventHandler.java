@@ -2,7 +2,9 @@ package com.atex.h11.custom.event.sph;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+
 import org.apache.log4j.Logger;
+
 import com.unisys.media.cr.adapter.ncm.common.data.pk.NCMObjectPK;
 import com.unisys.media.cr.adapter.ncm.common.data.values.NCMObjectBuildProperties;
 import com.unisys.media.cr.adapter.ncm.common.event.interfaces.IObjectEvent;
@@ -10,7 +12,6 @@ import com.unisys.media.cr.adapter.ncm.model.data.datasource.NCMDataSource;
 import com.unisys.media.cr.adapter.ncm.model.data.values.NCMObjectValueClient;
 import com.unisys.media.cr.adapter.ncm.common.data.values.NCMStatusPropertyValue;
 import com.unisys.media.cr.common.data.interfaces.IDataSource;
-import com.unisys.media.extension.common.exception.MediaException;
 
 public class ChildEventHandler {
 
@@ -46,29 +47,27 @@ public class ChildEventHandler {
 			// get object status
 			NCMStatusPropertyValue objStatus = 
 				(NCMStatusPropertyValue) obj.getLayout().getStatus().getValue();			
-			
-			// get parent SP
-			NCMObjectValueClient sp = getParentSP(obj.getParentId());
-			
+						
 			if (m_init.isExportStatus(objStatus.getStatus())) {
 				// export SP
-				exportPackage(objId, sp, objStatus);
+				exportParentPackage(objId, obj, objStatus);
 			}
 			else {
-				// update the parent SP's status to follow that of the child object's
-				updateParentSPStatus(objId, sp, objStatus);
+				// update the status of the parent SP and sibling objects 
+				// to follow that of the current object's
+				updateRelatedObjectsStatus(objId, obj, objStatus);
 			}
 			
 		} catch(Exception e) {
-			logger.error("Error encountered while handling SP event. Event=" + event.toString(), e);
+			logger.error("Error encountered while handling Object event. Event=" + event.toString(), e);
 		}		
 	}
 	
-	private NCMObjectValueClient getParentSP(int spId) {
+	private NCMObjectValueClient getParentSP(NCMObjectValueClient obj) {
 		NCMObjectBuildProperties objProps = new NCMObjectBuildProperties();
 		objProps.setGetByObjId(true);
 		
-		NCMObjectPK pk = new NCMObjectPK(spId);
+		NCMObjectPK pk = new NCMObjectPK(obj.getSpId());
 		NCMObjectValueClient sp = (NCMObjectValueClient) ((NCMDataSource)m_ds).getNode(pk, objProps);
 		return sp;
 	}
@@ -78,17 +77,24 @@ public class ChildEventHandler {
 	 * have the same status as the story package 
 	 * 
 	 */
-	private void updateParentSPStatus(int objId, NCMObjectValueClient sp, NCMStatusPropertyValue spStatus) {		
-		boolean spLocked = false;	
-		
+	private void updateRelatedObjectsStatus(int objId, NCMObjectValueClient obj, NCMStatusPropertyValue objStatus) {		
 		try {
-			logger.debug("Object saved: name=" + sp.getNCMName() + ", id=" + Integer.toString(objId) + ", type=" + sp.getType()
-				+ ", status=" + Short.toString(spStatus.getStatus()));
-	
+			logger.debug("Object saved: name=" + obj.getNCMName() + ", id=" + Integer.toString(objId) + ", type=" + obj.getType()
+				+ ", status=" + Short.toString(objStatus.getStatus()));
+				
+			// get parent SP and change its status
+			NCMObjectValueClient sp = getParentSP(obj);		
+			// get sp status
+			NCMStatusPropertyValue spStatus = (NCMStatusPropertyValue) sp.getLayout().getStatus().getValue();
+			// update sp status
+			if ((short)objStatus.getStatus() != (short)spStatus.getStatus()) {
+				changeStatus(sp, objStatus.getStatus());
+			}
+
 			NCMObjectBuildProperties objProps = new NCMObjectBuildProperties();
 			objProps.setGetByObjId(true);
 			
-			// get SP child objects
+			// get SP child objects and change their statuses
 			NCMObjectPK[] childPKs = (NCMObjectPK[]) sp.getChildPKs();
 			
 			if (childPKs != null) {
@@ -102,10 +108,9 @@ public class ChildEventHandler {
     						// get child status
     						NCMStatusPropertyValue childStatus = 
     							(NCMStatusPropertyValue) child.getLayout().getStatus().getValue();
-    						
-    						if ((short)spStatus.getStatus() != (short)childStatus.getStatus()) {
-	    						// update object status to follow that of the SP
-	    						changeStatus(child, spStatus.getStatus());
+    						// update child status
+    						if ((short)objStatus.getStatus() != (short)childStatus.getStatus()) {
+	    						changeStatus(child, objStatus.getStatus());
     						}
     					}
 					} catch (Exception e) {
@@ -115,15 +120,7 @@ public class ChildEventHandler {
 			}
 			
 		} catch(Exception e) {
-			logger.error("Error encountered while updating status of child objects. name=" + sp.getNCMName() + ", id=" + Integer.toString(objId), e);
-		} finally {
-			try {
-				if (spLocked) {				
-					sp.unlock(false);	// unlock
-				}				
-			} catch(Exception e) {
-				logger.error("Error encountered while unlocking object: " + sp.getNCMName(), e);					
-			}
+			logger.error("Error encountered while updating status of related objects. name=" + obj.getNCMName() + ", id=" + Integer.toString(objId), e);
 		}
 	}
 	
@@ -131,7 +128,7 @@ public class ChildEventHandler {
 		boolean objLocked = false;		
 		
 		try {
-			logger.debug("Attempt to update object status: name=" + obj.getNCMName() + ", id=" + obj.getPK().toString()
+			logger.debug("Attempt to update object status: name=" + obj.getNCMName() + ", id=" + obj.getPK().toString() + ", type=" + obj.getType()
 				+ ", new status=" + Short.toString(newStatusValue));
 
 			try {
@@ -158,12 +155,10 @@ public class ChildEventHandler {
 				obj.changeStatus(obj.getPK(), newStatusValue, curStatus.getExtStatus().shortValue(), 
 					curStatus.getComplexStatus().intValue(), curStatus.getAttribute().shortValue(), 
 					new short[0]);
-				logger.debug("Updated status of object: name=" + obj.getNCMName() + ", id=" + obj.getPK().toString()
+				logger.debug("Updated status of object: name=" + obj.getNCMName() + ", id=" + obj.getPK().toString() + ", type=" + obj.getType()
 					+ ", new status=" + Short.toString(newStatusValue));
 			}
 			
-		} catch(MediaException e) {
-			logger.error("Error encountered while changing status of object: " + obj.getNCMName(), e);
 		} catch(Exception e) {
 			logger.error("Error encountered while changing status of object: " + obj.getNCMName(), e);					
 		} finally {
@@ -177,15 +172,19 @@ public class ChildEventHandler {
 		}
 	}
 	
-	private void exportPackage(int objId, NCMObjectValueClient sp, NCMStatusPropertyValue spStatus) {		
+	private void exportParentPackage(int objId, NCMObjectValueClient obj, NCMStatusPropertyValue expStatus) {		
         URL url = null;
         HttpURLConnection conn = null;  
         
-        try {				
-			logger.debug("Send package to web: name=" + sp.getNCMName() + ", id=" + Integer.toString(objId) 
-				+ ", status=" + Short.toString(spStatus.getStatus()));
+		// get parent SP
+    	int spId = obj.getParentId();
+		NCMObjectValueClient sp = getParentSP(obj);	       	        
+        
+        try {				        	
+			logger.debug("Send package to web: name=" + sp.getNCMName() + ", id=" + Integer.toString(spId) 
+				+ ", status=" + Short.toString(expStatus.getStatus()));
 						
-			String urlStr = m_init.getExportURL(objId, spStatus.getStatus());
+			String urlStr = m_init.getExportURL(spId, expStatus.getStatus());
 			logger.debug("Call servlet: " + urlStr);
             url = new URL(urlStr);
             
@@ -198,18 +197,17 @@ public class ChildEventHandler {
             conn.connect();
            
             if (conn.getResponseCode() == 200) { 	// 200 = OK
-            	logger.debug("Package: name=" + sp.getNCMName() + ", id=" + Integer.toString(objId) 
-            		+ " exported");
+            	logger.debug("Package: name=" + sp.getNCMName() + ", id=" + Integer.toString(spId) 
+            		+ " exported");            	
             	
-            	
-            	if (m_init.getStatusAfterExport(spStatus.getStatus()) > 0) {
-            		// change status of package
-            		// changing of status of child objects will follow, after the package's status is changed
-            		changeStatus(sp, m_init.getStatusAfterExport(spStatus.getStatus()));
+            	if (m_init.getStatusAfterExport(expStatus.getStatus()) > 0) {
+            		// change status of the current object
+            		// changing of status of related objects will follow, after the current object's status is changed
+            		changeStatus(obj, m_init.getStatusAfterExport(expStatus.getStatus()));
             	}
             	else {
-            		// just change the status of child objects
-            	//	updateChildrenStatus(objId, sp, spStatus);
+            		// just change the status of related objects
+            		updateRelatedObjectsStatus(objId, obj, expStatus);
             	}
             }
             else {
@@ -218,7 +216,7 @@ public class ChildEventHandler {
             }
             
 		} catch(Exception e) {
-			logger.error("Error encountered while exporting package. name=" + sp.getNCMName() + ", id=" + Integer.toString(objId), e);
+			logger.error("Error encountered while exporting package. name=" + sp.getNCMName() + ", id=" + Integer.toString(spId), e);
 		}		
         finally {
             if (conn != null) {
