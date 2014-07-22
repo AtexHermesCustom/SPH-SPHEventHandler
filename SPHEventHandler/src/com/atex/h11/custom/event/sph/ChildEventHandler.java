@@ -177,7 +177,7 @@ public class ChildEventHandler {
         HttpURLConnection conn = null;  
         
 		// get parent SP
-    	int spId = obj.getParentId();
+    	int spId = obj.getSpId();
 		NCMObjectValueClient sp = getParentSP(obj);	       	        
         
         try {				        	
