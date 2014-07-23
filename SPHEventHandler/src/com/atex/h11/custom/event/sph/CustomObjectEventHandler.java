@@ -61,10 +61,9 @@ public class CustomObjectEventHandler extends ObjectEventHandler {
 		if (event.getObjectType() == NCMObjectNodeType.OBJ_TEXT) {
 			// trigger the handler only for:
 			// 1. object save (in any application)
-			// 2. object move/transfer (only if done in Media Desktop).  move/transfer in Newsroom triggers a Save event
+			// 2. object move/transfer (in any application)
 			if (event.getJEvent().EventId == Constants.SAVE_OBJ ||
-				(event.getJEvent().EventId == Constants.MOVE_OBJ && 
-				 event.getJEvent().AppId == Integer.parseInt(ApplicationConstants.APP_MD_PRODUCTION_ID))) {
+				event.getJEvent().EventId == Constants.MOVE_OBJ) {
 				new ChildEventHandler(m_init, ds).handleObjectEvent(event);
 			}
 		}		
