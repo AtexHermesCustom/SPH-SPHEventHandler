@@ -241,8 +241,9 @@ public class SPEventHandler {
 	private int getObjIdFromPK(INodePK pk) {
 		String s = pk.toString();
 		int delimIdx = s.indexOf(":");
-		if (delimIdx >= 0)
+		if (delimIdx >= 0) {
 			s = s.substring(0, delimIdx);
+		}
 		return Integer.parseInt(s);
 	}	
 }
