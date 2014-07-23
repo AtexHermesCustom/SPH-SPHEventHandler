@@ -2,7 +2,9 @@ package com.atex.h11.custom.event.sph;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+
 import org.apache.log4j.Logger;
+
 import com.unisys.media.cr.adapter.ncm.common.data.pk.NCMObjectPK;
 import com.unisys.media.cr.adapter.ncm.common.data.values.NCMObjectBuildProperties;
 import com.unisys.media.cr.adapter.ncm.common.event.interfaces.IObjectEvent;
@@ -10,6 +12,7 @@ import com.unisys.media.cr.adapter.ncm.model.data.datasource.NCMDataSource;
 import com.unisys.media.cr.adapter.ncm.model.data.values.NCMObjectValueClient;
 import com.unisys.media.cr.adapter.ncm.common.data.values.NCMStatusPropertyValue;
 import com.unisys.media.cr.common.data.interfaces.IDataSource;
+import com.unisys.media.cr.common.data.interfaces.INodePK;
 import com.unisys.media.extension.common.exception.MediaException;
 
 public class SPEventHandler {
@@ -138,7 +141,8 @@ public class SPEventHandler {
 		boolean objLocked = false;		
 		
 		try {
-			logger.debug("Attempt to update object status: name=" + obj.getNCMName() + ", id=" + obj.getPK().toString()
+			int objId = getObjIdFromPK(obj.getPK());
+			logger.debug("Attempt to update object status: name=" + obj.getNCMName() + ", id=" + objId + ", type=" + obj.getType()
 				+ ", new status=" + Short.toString(newStatusValue));
 
 			try {
@@ -165,7 +169,7 @@ public class SPEventHandler {
 				obj.changeStatus(obj.getPK(), newStatusValue, curStatus.getExtStatus().shortValue(), 
 					curStatus.getComplexStatus().intValue(), curStatus.getAttribute().shortValue(), 
 					new short[0]);
-				logger.debug("Updated status of object: name=" + obj.getNCMName() + ", id=" + obj.getPK().toString()
+				logger.debug("Updated status of object: name=" + obj.getNCMName() + ", id=" + objId + ", type=" + obj.getType()
 					+ ", new status=" + Short.toString(newStatusValue));
 			}
 			
@@ -233,4 +237,12 @@ public class SPEventHandler {
             }
         }		
 	}
+	
+	private int getObjIdFromPK(INodePK pk) {
+		String s = pk.toString();
+		int delimIdx = s.indexOf(":");
+		if (delimIdx >= 0)
+			s = s.substring(0, delimIdx);
+		return Integer.parseInt(s);
+	}	
 }

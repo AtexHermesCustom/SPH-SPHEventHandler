@@ -12,6 +12,7 @@ import com.unisys.media.cr.adapter.ncm.model.data.datasource.NCMDataSource;
 import com.unisys.media.cr.adapter.ncm.model.data.values.NCMObjectValueClient;
 import com.unisys.media.cr.adapter.ncm.common.data.values.NCMStatusPropertyValue;
 import com.unisys.media.cr.common.data.interfaces.IDataSource;
+import com.unisys.media.cr.common.data.interfaces.INodePK;
 
 public class ChildEventHandler {
 
@@ -128,7 +129,8 @@ public class ChildEventHandler {
 		boolean objLocked = false;		
 		
 		try {
-			logger.debug("Attempt to update object status: name=" + obj.getNCMName() + ", id=" + obj.getPK().toString() + ", type=" + obj.getType()
+			int objId = getObjIdFromPK(obj.getPK());
+			logger.debug("Attempt to update object status: name=" + obj.getNCMName() + ", id=" + objId + ", type=" + obj.getType()
 				+ ", new status=" + Short.toString(newStatusValue));
 
 			try {
@@ -155,19 +157,19 @@ public class ChildEventHandler {
 				obj.changeStatus(obj.getPK(), newStatusValue, curStatus.getExtStatus().shortValue(), 
 					curStatus.getComplexStatus().intValue(), curStatus.getAttribute().shortValue(), 
 					new short[0]);
-				logger.debug("Updated status of object: name=" + obj.getNCMName() + ", id=" + obj.getPK().toString() + ", type=" + obj.getType()
+				logger.debug("Updated status of object: name=" + obj.getNCMName() + ", id=" + objId + ", type=" + obj.getType()
 					+ ", new status=" + Short.toString(newStatusValue));
 			}
 			
 		} catch(Exception e) {
-			logger.error("Error encountered while changing status of object: " + obj.getNCMName(), e);					
+			logger.error("Error encountered while changing status of object: name=" + obj.getNCMName(), e);					
 		} finally {
 			try {
 				if (objLocked) {				
 					obj.unlock(false);	// unlock
 				}				
 			} catch(Exception e) {
-				logger.error("Error encountered while unlocking object: " + obj.getNCMName(), e);					
+				logger.error("Error encountered while unlocking object: name=" + obj.getNCMName(), e);					
 			}
 		}
 	}
@@ -224,4 +226,12 @@ public class ChildEventHandler {
             }
         }		
 	}
+	
+	private int getObjIdFromPK(INodePK pk) {
+		String s = pk.toString();
+		int delimIdx = s.indexOf(":");
+		if (delimIdx >= 0)
+			s = s.substring(0, delimIdx);
+		return Integer.parseInt(s);
+	}		
 }
