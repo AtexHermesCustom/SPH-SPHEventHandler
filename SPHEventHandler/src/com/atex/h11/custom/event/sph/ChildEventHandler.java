@@ -13,12 +13,14 @@ import com.unisys.media.cr.adapter.ncm.model.data.values.NCMObjectValueClient;
 import com.unisys.media.cr.adapter.ncm.common.data.values.NCMStatusPropertyValue;
 import com.unisys.media.cr.common.data.interfaces.IDataSource;
 import com.unisys.media.cr.common.data.interfaces.INodePK;
+import com.unisys.media.extension.common.constants.ApplicationConstants;
 
 public class ChildEventHandler {
 
 	static Logger logger = Logger.getLogger(Constants.NAME_LOGGER); 
 	private IDataSource m_ds;
 	private Initializer m_init;
+	private int sourceApp;
 	
 	public ChildEventHandler(Initializer init, IDataSource ds) {
 		setDataSource(ds);
@@ -35,6 +37,7 @@ public class ChildEventHandler {
 	
 	public void handleObjectEvent(IObjectEvent event) {
 		logger.debug("Object event received: " + event.toString()); 
+		sourceApp = event.getJEvent().AppId;
 		
 		NCMObjectBuildProperties objProps = new NCMObjectBuildProperties();
 		objProps.setGetByObjId(true);
@@ -83,14 +86,8 @@ public class ChildEventHandler {
 			logger.debug("Object saved: name=" + obj.getNCMName() + ", id=" + Integer.toString(objId) + ", type=" + obj.getType()
 				+ ", status=" + Short.toString(objStatus.getStatus()));
 				
-			// get parent SP and change its status
+			// get parent SP
 			NCMObjectValueClient sp = getParentSP(obj);		
-			// get sp status
-			NCMStatusPropertyValue spStatus = (NCMStatusPropertyValue) sp.getLayout().getStatus().getValue();
-			// update sp status
-			if ((short)objStatus.getStatus() != (short)spStatus.getStatus()) {
-				changeStatus(sp, objStatus.getStatus());
-			}
 
 			NCMObjectBuildProperties objProps = new NCMObjectBuildProperties();
 			objProps.setGetByObjId(true);
@@ -118,6 +115,17 @@ public class ChildEventHandler {
 						logger.error("Error encountered while getting child object: " + Integer.toString(childPKs[i].getObjId()), e);
 					}						
 				}
+			}
+			
+			// get parent sp's status
+			NCMStatusPropertyValue spStatus = (NCMStatusPropertyValue) sp.getLayout().getStatus().getValue();
+			// update sp status last
+			if ((short)objStatus.getStatus() != (short)spStatus.getStatus()) {
+				// need to sleep for events from Newsroom so that the package status will get updated properly
+				if (sourceApp == Integer.parseInt(ApplicationConstants.APP_HERMES_NEWSROOM_ID)) {
+					Thread.sleep(m_init.getSleepBeforePackageStatusUpdate());		
+				}
+				changeStatus(sp, objStatus.getStatus());
 			}
 			
 		} catch(Exception e) {

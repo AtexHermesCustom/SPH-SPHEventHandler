@@ -108,6 +108,16 @@ public class Initializer extends InitializerAbstract {
 		return false;
 	}	
 	
+	public int getSleepBeforePackageStatusUpdate() {
+		String s = getProperty("SleepBeforePackageStatusUpdateSeconds");
+		if (!s.isEmpty()) {
+			return Integer.parseInt(s) * 1000;
+		}
+		else {
+			return 0;
+		}
+	}
+	
 	/**
 	 * returns true or false - whether to lock the sp or not during processing
 	 * @return
