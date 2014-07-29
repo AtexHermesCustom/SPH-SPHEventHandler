@@ -9,6 +9,7 @@ import com.atex.h11.custom.event.sph.lock.Initializer;
 import com.unisys.media.cr.adapter.ncm.common.business.interfaces.INCMMetadataNodeManager;
 import com.unisys.media.cr.adapter.ncm.common.data.pk.NCMCustomMetadataPK;
 import com.unisys.media.cr.adapter.ncm.common.data.pk.NCMObjectPK;
+import com.unisys.media.cr.adapter.ncm.common.data.types.NCMObjectNodeType;
 import com.unisys.media.cr.adapter.ncm.common.data.values.NCMCustomMetadataJournal;
 import com.unisys.media.cr.adapter.ncm.common.data.values.NCMMetadataPropertyValue;
 import com.unisys.media.cr.adapter.ncm.common.data.values.NCMObjectBuildProperties;
@@ -63,6 +64,10 @@ public class LockHandler extends ObjectEventHandler {
 	}
 	
 	private void handleLockEvent(IObjectEvent event) {
+		if (event.getObjectType() != NCMObjectNodeType.OBJ_TEXT) {
+			return;		// only process lock/unlock events for Text objects
+		}
+		
 		String modifier = Integer.toString(event.getModifingId());
 		if (m_init.getIgnoreUserId(event.getJEvent().EventId).equals(modifier)) {
 			return;		// ignore event initiated by a particular user

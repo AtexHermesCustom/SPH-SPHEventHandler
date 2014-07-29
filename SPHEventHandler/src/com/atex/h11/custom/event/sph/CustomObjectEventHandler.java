@@ -13,10 +13,14 @@ public class CustomObjectEventHandler extends ObjectEventHandler {
 	
 	private static boolean isInitialized = false;
 	private static Initializer m_init = null;	
+	private static int statusSyncMode = 0;
 		
 	private void initialize() {
 		System.out.println("Initializing " + this.getClass().getName() + "...");
+		
 		m_init = new Initializer();
+		statusSyncMode = m_init.getStatusSyncMode();
+		
 		System.out.println("Initialized " + this.getClass().getName() + " OK");
 		isInitialized = true;
 	}
@@ -47,7 +51,8 @@ public class CustomObjectEventHandler extends ObjectEventHandler {
 	
 	private void processEvent(IDataSource ds, IObjectEvent event) {
 		// events for story packages
-		if (event.getObjectType() == NCMObjectNodeType.OBJ_STORY_PACKAGE) {
+		if (event.getObjectType() == NCMObjectNodeType.OBJ_STORY_PACKAGE &&
+			statusSyncMode == Constants.FOLLOW_SP_STATUS) {
 			// trigger the handler only for:
 			// 1. object save (in any application)
 			// 2. object move/transfer (only if done in Media Desktop).  move/transfer in Newsroom triggers a Save event
@@ -58,7 +63,8 @@ public class CustomObjectEventHandler extends ObjectEventHandler {
 			}
 		}
 		// events for text objects
-		if (event.getObjectType() == NCMObjectNodeType.OBJ_TEXT) {
+		if (event.getObjectType() == NCMObjectNodeType.OBJ_TEXT &&
+			statusSyncMode == Constants.FOLLOW_TEXT_STATUS) {
 			// trigger the handler only for:
 			// 1. object save (in any application)
 			// 2. object move/transfer (in any application)
@@ -80,7 +86,8 @@ public class CustomObjectEventHandler extends ObjectEventHandler {
 			// trigger handler only for:
 			// 1. layout save
 			// 2. unlink
-			if (event.getJEvent().EventId == Constants.LAYOUTSAVE_OBJ || event.getJEvent().EventId == Constants.UNLINK_OBJ) {
+			if (event.getJEvent().EventId == Constants.LAYOUTSAVE_OBJ || 
+				event.getJEvent().EventId == Constants.UNLINK_OBJ) {
 				new ObjectEventDumper(m_init, ds).handleObjectEvent(event);
 			}
 		}

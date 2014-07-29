@@ -18,5 +18,8 @@ public class Constants {
 	public static final int MOVE_OBJ 	= 10;
 	public static final int UNLINK_OBJ	= 9;
 	public static final int LAYOUTSAVE_OBJ = 63;
-		
+	
+	// Status synchronization modes
+	public static final int FOLLOW_SP_STATUS = 0;
+	public static final int FOLLOW_TEXT_STATUS = 1;
 }	

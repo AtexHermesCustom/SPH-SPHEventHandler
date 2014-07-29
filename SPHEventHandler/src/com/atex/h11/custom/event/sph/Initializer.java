@@ -108,6 +108,24 @@ public class Initializer extends InitializerAbstract {
 		return false;
 	}	
 	
+	/**
+	 * returns status synchronization mode
+	 * @return
+	 */	
+	public int getStatusSyncMode() {
+		String s = getProperty("StatusSyncMode");
+		if (!s.isEmpty()) {
+			return Integer.parseInt(s);
+		}
+		else {
+			return 0;
+		}
+	}
+	
+	/**
+	 * returns number of seconds to sleep before updating the package status
+	 * @return
+	 */		
 	public int getSleepBeforePackageStatusUpdate() {
 		String s = getProperty("SleepBeforePackageStatusUpdateSeconds");
 		if (!s.isEmpty()) {
