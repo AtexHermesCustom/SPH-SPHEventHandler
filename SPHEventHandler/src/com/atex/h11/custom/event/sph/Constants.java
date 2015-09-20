@@ -22,4 +22,5 @@ public class Constants {
 	// Status synchronization modes
 	public static final int FOLLOW_SP_STATUS = 0;
 	public static final int FOLLOW_TEXT_STATUS = 1;
+	
 }	
